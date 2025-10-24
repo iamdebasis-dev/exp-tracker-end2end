@@ -1,44 +1,41 @@
-import { useEffect, useState } from "react";
-import { sampleExpenses } from "./data";
-import ExpensesList from "./ExpensesList";
+import { useState } from "react"
+import { sampleExpenses } from "./data"
+import ExpensesList from "./ExpensesList"
+import ExpensesForm from "./ExpensesForm"
+import ExpenseSummary from "./ExpenseSummary"
 
+const App =()=>{
+  const[expenses ,setExpenses]=useState(sampleExpenses)
+  const [filterCategory, setFilterCategory] = useState("");
 
-
-
-function App(){
-  const[Expenses , setExpenses] = useState(sampleExpenses);
-  const [categories, setCategories] = useState([])
-  const[FilterCategory,setFilterCategory] = useState("*")
-
-  useEffect(() =>{
-    if(Expenses.length>0){
-      const categoriesSet = newSet()
-      Expenses.forEach(e =>{
-        categoriesSet.add(e.category)
-      })
-      setCategories(Array.from(categoriesSet))
-    }
-  },[Expenses])
-  const onDelete = (recordId) =>{
-    setExpenses(Expenses.filter(E => E.id != recordId))
+  const handleDeleteRecord = (id) => {
+    setExpenses(expenses.filter(expense => expense.id !== id))
   }
-  return(
-  <div>
-    <div className="grid grid-cols-2 gap-2 justify-between max-h-sm items-center">
-      <h1>Filter by Category</h1>
-      <select defaultValue={"setFilterCtegory"} onChange={(e) => {
-        setFilterCategory(e.target.value)}} className="bg-gray-50 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500">
-          <option value="*" disabled >Select a category</option>
-          {categories.map(categories => <option key={categories} value={categories}>{categories}</option>)}
-        </select>
 
-    </div>
-    
-    <ExpensesList onDeleteRecord={(recordId)=>{ onDelete=(recordId)}}
-    record={FilterCategory == "*" ? Expenses:Expenses.filter(e.categories === FilterCategory)} />
-  </div>
-  )
+  const handleAddExpense = (newExpense) => {
+    setExpenses([...expenses,{ ...newExpense, id: Date.now() }]);};
 
+  const categories = [...new Set(sampleExpenses.map((e) => e.category))];
+
+ 
+  const filteredExpenses = filterCategory && filterCategory !== ""? expenses.filter((e) => e.category === filterCategory): expenses;
+
+  return (
+    <>
   
+      <h1 className="flex justify-center text-3xl text-bold py-3">Expenses Tracker</h1>
+      <div className="p-3">
+      <ExpensesForm categories={categories} 
+      setFilterCategory={setFilterCategory} 
+      onAddExpense={handleAddExpense}/>
+      <div className="grid grid-cols-2 m-1 ">
+      <ExpensesList expenses={expenses} onDeleteRecord={handleDeleteRecord} />
+      <div className="p-7">
+      <ExpenseSummary records={expenses} />
+      </div>
+      </div>
+    </div>
+    </>
+  )
 }
-export default App ;
+export default App
